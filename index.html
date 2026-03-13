@@ -15,7 +15,7 @@ font-family:Arial, Helvetica, sans-serif;
 
 <body>
 
-<a-scene id="escena">
+<a-scene id="escena" vr-mode-ui="enabled: true">
 
 <a-light type="ambient" intensity="0.7"></a-light>
 <a-light type="directional" position="2 6 3" intensity="0.8"></a-light>
@@ -32,13 +32,13 @@ material="color:#f0f0f0; side:back; roughness:0.9"></a-box>
 <img id="conejo" src="assets/conejo.jpg">
 <img id="panda" src="assets/panda.jpg">
 
-<img id="cartaReverso" src="assets/carta.jpg">
+<img id="cartaReverso" src="assets/carta.png">
 
 <img id="iconReiniciar" src="assets/reiniciar.png">
 <img id="iconMenu" src="assets/menu.png">
 
-<img id="iconSonido" src="assets/mute.png">
-<img id="iconMuteImg" src="assets/sonido.png">
+<img id="iconSonido" src="assets/sonido.png">
+<img id="iconMuteImg" src="assets/mute.png">
 
 <audio id="sonidoClick" src="assets/reloj.mp3"></audio>
 <audio id="musicaFondo" src="assets/musica.mp3" loop></audio>
@@ -113,6 +113,23 @@ height="0.6"
 material="src:#iconMenu; shader:flat; transparent:true">
 </a-plane>
 
+<!-- BOTÓN VR -->
+<a-plane id="botonVR"
+position="0 0.2 -2"
+width="1.5"
+height="0.5"
+color="#3498db">
+
+<a-text
+value="ENTRAR A VR"
+align="center"
+position="0 0 0.1"
+color="white"
+width="3">
+</a-text>
+
+</a-plane>
+
 <a-entity camera look-controls wasd-controls position="0 1.6 3">
 <a-cursor color="#f1c40f" fuse="true" fuse-timeout="2000"></a-cursor>
 </a-entity>
@@ -131,6 +148,7 @@ const textoGanaste=document.querySelector("#ganaste");
 const botonReiniciarIcono=document.querySelector("#botonReiniciarIcono");
 const botonMenuIcono=document.querySelector("#botonMenuIcono");
 const botonMute=document.querySelector("#botonMute");
+const botonVR=document.querySelector("#botonVR");
 
 const sonidoReloj=document.querySelector("#sonidoReloj");
 const sonidoAcierto=document.querySelector("#sonidoAciertoEntidad");
@@ -155,6 +173,10 @@ let juegoIniciado=false;
 document.addEventListener("click",()=>{
 musica.components.sound.playSound();
 },{once:true});
+
+botonVR.addEventListener("click",()=>{
+document.querySelector("a-scene").enterVR();
+});
 
 botonMute.addEventListener("click",()=>{
 
