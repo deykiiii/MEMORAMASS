@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Memorama Animales 3D</title>
+<title>Memorama Animales VR</title>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
 <style>
@@ -15,7 +15,7 @@ font-family:Arial, Helvetica, sans-serif;
 
 <body>
 
-<a-scene id="escena">
+<a-scene id="escena" vr-mode-ui="enabled: true">
 
 <a-light type="ambient" intensity="0.7"></a-light>
 <a-light type="directional" position="2 6 3" intensity="0.8"></a-light>
@@ -26,17 +26,13 @@ font-family:Arial, Helvetica, sans-serif;
 material="color:#f0f0f0; side:back; roughness:0.9"></a-box>
 
 <a-assets>
-
 <img id="perro" src="assets/perro.jpeg">
 <img id="gato" src="assets/gato.jpg">
 <img id="conejo" src="assets/conejo.jpg">
 <img id="panda" src="assets/panda.jpg">
-
 <img id="cartaReverso" src="assets/carta.jpg">
-
 <img id="iconReiniciar" src="assets/reiniciar.png">
 <img id="iconMenu" src="assets/menu.png">
-
 <img id="iconSonido" src="assets/mute.png">
 <img id="iconMuteImg" src="assets/sonido.png">
 
@@ -45,7 +41,6 @@ material="color:#f0f0f0; side:back; roughness:0.9"></a-box>
 <audio id="sonidoAcierto" src="assets/acierto.mp3"></audio>
 <audio id="sonidoGanaste" src="assets/ganaste.mp3"></audio>
 <audio id="sonidoVoltear" src="assets/voltear.mp3"></audio>
-
 </a-assets>
 
 <a-entity id="sonidoReloj" sound="src:#sonidoClick; loop:true; volume:3"></a-entity>
@@ -55,73 +50,49 @@ material="color:#f0f0f0; side:back; roughness:0.9"></a-box>
 
 <a-entity id="musica3D"
 position="0 1.5 -3"
-sound="src:#musicaFondo;
-loop:true;
-positional:true;
-distanceModel:inverse;
-refDistance:2;
-rolloffFactor:1.5;
-volume:1">
+sound="src:#musicaFondo; loop:true; positional:true; volume:1">
 </a-entity>
 
-<!-- PANEL SUPERIOR -->
-<a-plane position="0 4 -2.1" width="8" height="1"
-color="#ffffff" opacity="0.85"></a-plane>
+<!-- UI -->
+<a-plane position="0 4 -2.1" width="8" height="1" color="#ffffff" opacity="0.85"></a-plane>
 
-<!-- BOTÓN MUTE -->
-<a-plane id="botonMute"
-position="-4.3 4 -2"
-width="0.45"
-height="0.45"
+<a-plane id="botonMute" class="clickable"
+position="-4.3 4 -2" width="0.45" height="0.45"
 material="src:#iconSonido; shader:flat; transparent:true">
 </a-plane>
 
-<a-text id="puntaje"
-value="Pares: 0"
-position="-3.3 4 -2"
-color="#222"
-width="6"
-align="left"></a-text>
-
-<a-text id="tiempo"
-value="Tiempo: 0"
-position="3.5 4 -2"
-color="#222"
-width="6"
-align="right"></a-text>
-
-<a-text id="ganaste"
-value=""
-position="0 3.2 -2"
-color="#27ae60"
-align="center"
-width="8"></a-text>
+<a-text id="puntaje" value="Pares: 0" position="-3.3 4 -2" color="#222" width="6"></a-text>
+<a-text id="tiempo" value="Tiempo: 0" position="3.5 4 -2" color="#222" width="6"></a-text>
+<a-text id="ganaste" value="" position="0 3.2 -2" color="#27ae60" width="8"></a-text>
 
 <a-entity id="tablero"></a-entity>
 
-<a-plane id="botonReiniciarIcono"
-position="4.2 4 -2"
-width="0.6"
-height="0.6"
+<a-plane id="botonReiniciarIcono" class="clickable"
+position="4.2 4 -2" width="0.6" height="0.6"
 material="src:#iconReiniciar; shader:flat; transparent:true">
 </a-plane>
 
-<a-plane id="botonMenuIcono"
-position="4.9 4 -2"
-width="0.6"
-height="0.6"
+<a-plane id="botonMenuIcono" class="clickable"
+position="4.9 4 -2" width="0.6" height="0.6"
 material="src:#iconMenu; shader:flat; transparent:true">
 </a-plane>
 
-<a-entity camera look-controls wasd-controls position="0 1.6 3">
-<a-cursor color="#f1c40f" fuse="true" fuse-timeout="2000"></a-cursor>
-</a-entity>
+<!-- Cámara -->
+<a-entity camera position="0 1.6 3" look-controls></a-entity>
+
+<!-- Controles VR -->
+<a-entity laser-controls="hand: left"
+raycaster="objects: .clickable"
+line="color: #00ffff"></a-entity>
+
+<a-entity laser-controls="hand: right"
+raycaster="objects: .clickable"
+line="color: #ff0000"></a-entity>
 
 </a-scene>
 
 <script>
 
-const escena=document.querySelector("#escena");
 const tablero=document.querySelector("#tablero");
 
 const textoPuntaje=document.querySelector("#puntaje");
@@ -136,7 +107,6 @@ const sonidoReloj=document.querySelector("#sonidoReloj");
 const sonidoAcierto=document.querySelector("#sonidoAciertoEntidad");
 const sonidoGanaste=document.querySelector("#sonidoGanasteEntidad");
 const sonidoVoltear=document.querySelector("#sonidoVoltearEntidad");
-
 const musica=document.querySelector("#musica3D");
 
 let sonidoActivo=true;
@@ -148,47 +118,31 @@ let bloqueo=false;
 
 let pares=0;
 let tiempo=0;
-
 let temporizador;
 let juegoIniciado=false;
 
-document.addEventListener("click",()=>{
-musica.components.sound.playSound();
-},{once:true});
-
-botonMute.addEventListener("click",()=>{
-
+function toggleSonido(){
 sonidoActivo=!sonidoActivo;
 
-if(sonidoActivo){
+const vol=sonidoActivo?1:0;
+musica.setAttribute("sound","volume:"+vol);
+sonidoReloj.setAttribute("sound","volume:"+ (sonidoActivo?3:0));
+sonidoAcierto.setAttribute("sound","volume:"+ (sonidoActivo?2:0));
+sonidoGanaste.setAttribute("sound","volume:"+ (sonidoActivo?2:0));
+sonidoVoltear.setAttribute("sound","volume:"+ (sonidoActivo?2:0));
 
-musica.setAttribute("sound","volume:1");
-sonidoReloj.setAttribute("sound","volume:3");
-sonidoAcierto.setAttribute("sound","volume:2");
-sonidoGanaste.setAttribute("sound","volume:2");
-sonidoVoltear.setAttribute("sound","volume:2");
-
-botonMute.setAttribute("material","src:#iconSonido");
-
-}else{
-
-musica.setAttribute("sound","volume:0");
-sonidoReloj.setAttribute("sound","volume:0");
-sonidoAcierto.setAttribute("sound","volume:0");
-sonidoGanaste.setAttribute("sound","volume:0");
-sonidoVoltear.setAttribute("sound","volume:0");
-
-botonMute.setAttribute("material","src:#iconMuteImg");
-
+botonMute.setAttribute("material","src:"+(sonidoActivo?"#iconSonido":"#iconMuteImg"));
 }
 
-});
+botonMute.addEventListener("click",toggleSonido);
+botonMute.addEventListener("triggerdown",toggleSonido);
 
 function crearBotonInicio(){
 
 if(botonInicio) return;
 
 botonInicio=document.createElement("a-box");
+botonInicio.classList.add("clickable");
 
 botonInicio.setAttribute("position","0 0.7 -2");
 botonInicio.setAttribute("width","2.5");
@@ -197,54 +151,43 @@ botonInicio.setAttribute("depth","0.3");
 botonInicio.setAttribute("color","#27ae60");
 
 const texto=document.createElement("a-text");
-
 texto.setAttribute("value","INICIAR JUEGO");
 texto.setAttribute("align","center");
 texto.setAttribute("position","0 0 0.2");
 texto.setAttribute("color","white");
-texto.setAttribute("width","3");
 
 botonInicio.appendChild(texto);
+document.querySelector("#escena").appendChild(botonInicio);
 
-escena.appendChild(botonInicio);
-
-botonInicio.addEventListener("click",()=>{
-
+function iniciar(){
+musica.components.sound.playSound();
 juegoIniciado=true;
-
 sonidoReloj.components.sound.playSound();
-
 crearTablero();
 iniciarTiempo();
-
-botonInicio.parentNode.removeChild(botonInicio);
+botonInicio.remove();
 botonInicio=null;
+}
 
-});
-
+botonInicio.addEventListener("click",iniciar);
+botonInicio.addEventListener("triggerdown",iniciar);
 }
 
 function iniciarTiempo(){
-
 clearInterval(temporizador);
-
 tiempo=0;
-
 textoTiempo.setAttribute("value","Tiempo: 0");
 
 temporizador=setInterval(()=>{
 tiempo++;
 textoTiempo.setAttribute("value","Tiempo: "+tiempo);
 },1000);
-
 }
 
 function limpiarTablero(){
-
 while(tablero.firstChild){
 tablero.removeChild(tablero.firstChild);
 }
-
 }
 
 function crearTablero(){
@@ -252,7 +195,6 @@ function crearTablero(){
 limpiarTablero();
 
 pares=0;
-
 primeraCarta=null;
 segundaCarta=null;
 bloqueo=false;
@@ -270,6 +212,7 @@ animales.sort(()=>Math.random()-0.5);
 for(let i=0;i<8;i++){
 
 const carta=document.createElement("a-box");
+carta.classList.add("clickable");
 
 const x=(i%4)*1.5-2.25;
 const y=Math.floor(i/4)*-1.5+2;
@@ -285,16 +228,14 @@ carta.dataset.animal=animales[i];
 carta.dataset.volteada="false";
 carta.dataset.acertada="false";
 
-carta.addEventListener("click",function(){
+function manejarClick(){
 
-if(!juegoIniciado) return;
-if(bloqueo) return;
+if(!juegoIniciado || bloqueo) return;
 if(carta===primeraCarta) return;
-
 if(carta.dataset.volteada==="true") return;
 if(carta.dataset.acertada==="true") return;
 
-carta.setAttribute("material","src:"+carta.dataset.animal+"; color:white");
+carta.setAttribute("material","src:"+carta.dataset.animal);
 carta.dataset.volteada="true";
 
 sonidoVoltear.components.sound.playSound();
@@ -313,7 +254,6 @@ primeraCarta.dataset.acertada="true";
 segundaCarta.dataset.acertada="true";
 
 pares++;
-
 sonidoAcierto.components.sound.playSound();
 
 textoPuntaje.setAttribute("value","Pares: "+pares);
@@ -323,27 +263,19 @@ segundaCarta=null;
 bloqueo=false;
 
 if(pares===4){
-
 clearInterval(temporizador);
-
 sonidoReloj.components.sound.stopSound();
-
 sonidoGanaste.components.sound.playSound();
 
-textoGanaste.setAttribute("value","¡GANASTE! Tiempo: "+tiempo+" segundos");
-
+textoGanaste.setAttribute("value","¡GANASTE! Tiempo: "+tiempo);
 crearBotonInicio();
-
 }
 
 }else{
 
 setTimeout(()=>{
-
-primeraCarta.setAttribute("material","src:#cartaReverso; color:white");
-segundaCarta.setAttribute("material","src:#cartaReverso; color:white");
-
-sonidoVoltear.components.sound.playSound();
+primeraCarta.setAttribute("material","src:#cartaReverso");
+segundaCarta.setAttribute("material","src:#cartaReverso");
 
 primeraCarta.dataset.volteada="false";
 segundaCarta.dataset.volteada="false";
@@ -356,24 +288,27 @@ bloqueo=false;
 
 }
 
-});
+}
+
+carta.addEventListener("click",manejarClick);
+carta.addEventListener("triggerdown",manejarClick);
 
 tablero.appendChild(carta);
-
+}
 }
 
-}
-
-botonReiniciarIcono.addEventListener("click",()=>{
+function reiniciar(){
 if(!juegoIniciado) return;
 crearTablero();
 iniciarTiempo();
-});
+}
 
-botonMenuIcono.addEventListener("click",()=>{
+botonReiniciarIcono.addEventListener("click",reiniciar);
+botonReiniciarIcono.addEventListener("triggerdown",reiniciar);
+
+function volverMenu(){
 
 clearInterval(temporizador);
-
 juegoIniciado=false;
 
 sonidoReloj.components.sound.stopSound();
@@ -385,8 +320,10 @@ textoPuntaje.setAttribute("value","Pares: 0");
 textoGanaste.setAttribute("value","");
 
 crearBotonInicio();
+}
 
-});
+botonMenuIcono.addEventListener("click",volverMenu);
+botonMenuIcono.addEventListener("triggerdown",volverMenu);
 
 crearBotonInicio();
 
